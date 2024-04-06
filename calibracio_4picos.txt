@@ -1,0 +1,96 @@
+# -*- coding: utf-8 -*-
+
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy.optimize import curve_fit
+
+# Definir la función gaussiana
+def gaussian(x, a, x0, sigma):
+    return a * np.exp(-(x - x0)**2 / (2 * sigma**2))
+
+def fondo(y_fondo):
+    return y_fondo
+
+# Definir la función que es la suma de tres gaussianas
+def multi_gaussian(x, a1, x01, sigma1, a2, x02, sigma2, a3, x03, sigma3, a4, x04, sigma4, y_fondo):
+    return (gaussian(x, a1, x01, sigma1) + 
+            gaussian(x, a2, x02, sigma2) + 
+            gaussian(x, a3, x03, sigma3) +
+            gaussian(x, a4, x04, sigma4) + fondo(y_fondo))
+
+# Importar datos desde un archivo de texto, omitiendo las primeras líneas
+data = np.loadtxt('C:/Users/mpallares/Desktop/Master/Practica detectors/canales - Fe.txt', delimiter='\t', skiprows=1)
+
+# Separar los datos en x y y
+x_data = data[:, 0]
+y_data = data[:, 1]
+
+# Ajustar los parámetros de las tres gaussianas a los datos
+p0 = [10, 420, 0.5, 10, 445, 0.5, 40, 580, 0.5,40, 610, 0.5, 500]  # Valores iniciales de los parámetros para tres gaussianas (amplitud, media, desviación estándar)
+params, cov = curve_fit(multi_gaussian, x_data, y_data, p0=p0)
+
+# Graficar los datos y el ajuste
+plt.plot(x_data, y_data, label='Datos')
+plt.plot(x_data, multi_gaussian(x_data, *params), label='Ajuste', color='red')
+
+params_rounded = [round(param, 2) for param in params]
+errors_rounded = [round(np.sqrt(cov[i, i]), 2) for i in range(len(params))]
+
+eqn_str = ('Amplitud 1: {:.2f} +- {:.2f}\n'.format(params_rounded[0], errors_rounded[0]) +
+           'Media 1: {:.2f} +- {:.2f}\n'.format(params_rounded[1], errors_rounded[1]) +
+           'Desviación estándar 1: {:.2f} +- {:.2f}\n'.format(params_rounded[2], errors_rounded[2]) +
+           'Amplitud 2: {:.2f} +- {:.2f}\n'.format(params_rounded[3], errors_rounded[3]) +
+           'Media 2: {:.2f} +- {:.2f}\n'.format(params_rounded[4], errors_rounded[4]) +
+           'Desviación estándar 2: {:.2f} +- {:.2f}\n'.format(params_rounded[5], errors_rounded[5]) +
+           'Amplitud 3: {:.2f} +- {:.2f}\n'.format(params_rounded[6], errors_rounded[6]) +
+           'Media 3: {:.2f} +- {:.2f}\n'.format(params_rounded[7], errors_rounded[7]) +
+           'Desviación estándar 3: {:.2f} +- {:.2f}\n'.format(params_rounded[8], errors_rounded[8]) + 
+           'Amplitud 4: {:.2f} +- {:.2f}\n'.format(params_rounded[9], errors_rounded[9]) +
+           'Media 4: {:.2f} +- {:.2f}\n'.format(params_rounded[10], errors_rounded[10]) +
+           'Desviación estándar 4: {:.2f} +- {:.2f}\n'.format(params_rounded[11], errors_rounded[11]) + 
+           'Fondo: {:.2f} +- {:.2f}'.format(params_rounded[12], errors_rounded[12]))
+
+
+# Insertar la ecuación en la gráfica
+plt.text(0.01, 0.35, eqn_str, fontsize=8, transform=plt.gca().transAxes)
+
+
+
+# Añadir títulos a los ejes
+plt.xlabel('Canal')
+plt.ylabel('Cuentas')
+
+plt.legend()
+plt.show()
+
+
+# Mostrar los valores ajustados
+print("Valores ajustados:")
+print("Amplitud 1:", params[0])
+print("Media 1:", params[1])
+print("Desviación estándar 1:", params[2])
+print("Amplitud 2:", params[3])
+print("Media 2:", params[4])
+print("Desviación estándar 2:", params[5])
+print("Amplitud 3:", params[6])
+print("Media 3:", params[7])
+print("Desviación estándar 3:", params[8])
+print("Amplitud 4:", params[9])
+print("Media 4:", params[10])
+print("Desviación estándar 4:", params[11])
+
+# También puedes acceder a los errores estimados de los parámetros
+print("\nErrores estimados de los parámetros:")
+print("Error de amplitud 1:", np.sqrt(cov[0, 0]))
+print("Error de media 1:", np.sqrt(cov[1, 1]))
+print("Error de desviación estándar 1:", np.sqrt(cov[2, 2]))
+print("Error de amplitud 2:", np.sqrt(cov[3, 3]))
+print("Error de media 2:", np.sqrt(cov[4, 4]))
+print("Error de desviación estándar 2:", np.sqrt(cov[5, 5]))
+print("Error de amplitud 3:", np.sqrt(cov[6, 6]))
+print("Error de media 3:", np.sqrt(cov[7, 7]))
+print("Error de desviación estándar 3:", np.sqrt(cov[8, 8]))
+print("Error de amplitud 4:", np.sqrt(cov[9, 9]))
+print("Error de media 4:", np.sqrt(cov[10, 10]))
+print("Error de desviación estándar 4:", np.sqrt(cov[11, 11]))
+# Si tienes más gaussianas, sigue imprimiendo los errores de la misma manera
